@@ -99,7 +99,7 @@ class Data_recorder:
             ]
         )
         print("FFMPEG_CONFIG", self.camera_widget.GUI.ffmpeg_config)
-        self.ffmpeg_process = subprocess.Popen(ffmpeg_command, stdin=subprocess.PIPE)
+        self.ffmpeg_process = subprocess.Popen(ffmpeg_command, stdin=subprocess.PIPE, shell=True)
 
     def stop_recording(self) -> None:
         """Close data files and FFMPEG process."""
