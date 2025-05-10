@@ -74,11 +74,9 @@ class ImageClient:
         return [top_left_x, top_left_y], [bottom_right_x, bottom_right_y]
     
     def process(self, image):
-        t = time.time()
         # Apply a simple Gaussian blur filter to the image
         processed_image = cv2.Canny(image, 100, 200)
-        lapsed = time.time() - t
-        self.status_bar.setText(f'Process time: {lapsed*1000:.1f} ms')
+
         return processed_image
     
     def update(self):
@@ -86,8 +84,10 @@ class ImageClient:
 
         if self.img_array is None:
             return
-        
+        t = time.time()
         processed_image = self.process(self.img_array)
+        lapsed = time.time() - t
+        self.status_bar.setText(f'Process time: {lapsed*1000:.1f} ms')
 
         if processed_image is None:
             return
