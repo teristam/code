@@ -1,2 +1,25 @@
+[project]
+name = "pyMultiVideo"
+version = "1.0.0"
+description = "Multi-camera video recording and GUI application. See https://pymultivideo.readthedocs.io/en/latest/ for details."
+authors = [
+    { name = "Your Name", email = "your.email@example.com" }
+]
+license = { file = "LICENSE" }
+readme = "readme.md"
+requires-python = ">=3.8"
+dependencies = [
+    "numpy<2.0",
+    "PyQt6",
+    "pyqtgraph",
+    "opencv-python",
+    "pyzmq",
+    "msgpack"
+]
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
 [tool.black]
 line-length = 120

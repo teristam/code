@@ -1,0 +1,6 @@
+numpy<2.0
+PyQt6
+pyqtgraph
+opencv-python
+pyzmq
+msgpack
