@@ -53,11 +53,16 @@ class ImageClient:
 
     def receive_image(self):
         if self.sub_socket.poll(timeout=1000):  # Wait for 1 second
-
-            topic, metadata_packed, image_bytes = self.sub_socket.recv_multipart()
+            # only process the latest image
+            while True:
+                try:
+                    topic, metadata_packed, image_bytes = self.sub_socket.recv_multipart(flags=zmq.NOBLOCK)
+                except zmq.Again:
+                    break
             metadata = msgpack.unpackb(metadata_packed)
 
             # Convert bytes to image array
+            # img_arry is in the format height x width
             img_array = np.frombuffer(image_bytes, dtype=np.uint8).reshape((metadata["height"], metadata["width"]))
             return img_array
 
@@ -75,7 +80,9 @@ class ImageClient:
     
     def process(self, image):
         # Apply a simple Gaussian blur filter to the image
-        processed_image = cv2.Canny(image, 100, 200)
+        processed_image = cv2.Canny(image, 100, 200)*255
+        # Invert the image
+        # processed_image = cv2.bitwise_not(processed_image)
 
         return processed_image
     
@@ -94,8 +101,8 @@ class ImageClient:
         
         self.win.setImage(processed_image.T, autoLevels=True)  # Transpose if needed for correct orientation
         msg = {"DRAW_BOX": {"TOP_LEFT": 100, "BOTTOM_RIGHT": 200}}
-        msg['width'] = processed_image.shape[0]
-        msg['height'] = processed_image.shape[1]
+        msg['width'] = processed_image.shape[1]
+        msg['height'] = processed_image.shape[0]
         # print('pushing')
         self.push_socket.send_multipart([b'processed', msgpack.packb(msg), processed_image])
 

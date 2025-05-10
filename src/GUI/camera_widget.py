@@ -69,6 +69,7 @@ class CameraWidget(QGroupBox):
         self.camera_height = self.camera_api.get_height()
         self.camera_width = self.camera_api.get_width()
         self.latest_image = None
+        self.processed_image = None
         self.frame_timestamps = deque([0], maxlen=10)
         self.controls_visible = True
 
@@ -81,6 +82,7 @@ class CameraWidget(QGroupBox):
         self.graphics_view.setCentralItem(self.video_view_box)
         pg.setConfigOption("imageAxisOrder", "row-major")
         self.video_image_item = pg.ImageItem()
+        self.processed_image_item = pg.ImageItem()
         self.video_view_box.addItem(self.video_image_item)
         self.video_view_box.setAspectLocked()
 
@@ -281,6 +283,10 @@ class CameraWidget(QGroupBox):
         image = np.frombuffer(self.latest_image, dtype=np.uint8).reshape(self.camera_height, self.camera_width)
         if self.settings.pixel_format != "Mono":
             image = cv2.cvtColor(image, self.camera_api.pixel_format_map[self.settings.pixel_format]["cv2"])
+        
+        if self.processed_image is not None:
+            #overlay the process image on top of the original
+            image = np.where(self.processed_image>0, self.processed_image, image)
         self.video_image_item.setImage(image)
         # Compute average framerate and display over image.
         avg_time_diff = (self.frame_timestamps[-1] - self.frame_timestamps[0]) / (self.frame_timestamps.maxlen - 1)
@@ -468,7 +474,7 @@ class CameraWidget(QGroupBox):
     def pull_from_socket(self):
         msgs = self.socket.get(timeout=0)  # Spend minimum time looking for images in the queue.
         if msgs is not None:
-            topic, metadata, image = msgs
+            topic, metadata, self.processed_image = msgs
             print(metadata) 
         # if msg is None:
         #     if hasattr(self, "current_rect_item"):

@@ -30,10 +30,14 @@ class Image_socket:
         """Try to recieve data in the pull socket"""
         try:
             if self.pull_address.poll(timeout=timeout):
-                msg1, msg2, msg3 = self.pull_address.recv_multipart()
+                # Only keep the latest message
+                while True:
+                    try:
+                        msg1, msg2, msg3 = self.pull_address.recv_multipart(flags=zmq.NOBLOCK)
+                    except zmq.Again:
+                        break
                 topic = msg1
                 metadata = msgpack.unpackb(msg2)
-                print(metadata)
                 image = np.frombuffer(msg3, dtype=np.uint8).reshape((metadata["height"], metadata["width"])) 
                 return topic, metadata, image
         except zmq.Again:
