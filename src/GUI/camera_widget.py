@@ -431,9 +431,9 @@ class CameraWidget(QGroupBox):
         self.socket_pub_timer.timeout.connect(self.publish_image)
         self.socket_pub_timer.start(int(1000 / self.GUI.server_config["put_rate"]))
         # Create timer for the rate of getting images from the socket
-        # self.socket_pulll_timer = QTimer()
-        # self.socket_pulll_timer.timeout.connect(self.pull_from_socket)
-        # self.socket_pulll_timer.start(int(1000 / self.GUI.server_config["pull_rate"]))
+        self.socket_pulll_timer = QTimer()
+        self.socket_pulll_timer.timeout.connect(self.pull_from_socket)
+        self.socket_pulll_timer.start(int(1000 / self.GUI.server_config["pull_rate"]))
         # Change the start_server_button to be connected to the stop server
         self.toggle_socket_button.clicked.disconnect(self.open_socket)
         self.toggle_socket_button.clicked.connect(self.close_socket)
@@ -465,21 +465,24 @@ class CameraWidget(QGroupBox):
         # Put JSON formatted string into the socket
         self.socket.send(topic=b"image", msgpacked_metadata=msgpack.packb(metadata), image_bytes=self.latest_image)
 
-    # def pull_from_socket(self):
-    #     msg = self.socket.get(timeout=0)  # Spend minimum time looking for images in the queue.
-    #     if msg is None:
-    #         if hasattr(self, "current_rect_item"):
-    #             self.video_view_box.removeItem(self.current_rect_item)
-    #             del self.current_rect_item
-    #         return
-    #     else:
-    #         # Parse the received message
-    #         # msg_data = json.loads(msg)
-    #         msg_data = msg
-    #         if "DRAW_BOX" in msg_data:
-    #             top_left = tuple(msg_data["DRAW_BOX"]["TOP_LEFT"])
-    #             lower_right = tuple(msg_data["DRAW_BOX"]["BOTTOM_RIGHT"])
-    #             self.draw_box(top_left=top_left, lower_right=lower_right)
+    def pull_from_socket(self):
+        msgs = self.socket.get(timeout=0)  # Spend minimum time looking for images in the queue.
+        if msgs is not None:
+            topic, metadata, image = msgs
+            print(metadata) 
+        # if msg is None:
+        #     if hasattr(self, "current_rect_item"):
+        #         self.video_view_box.removeItem(self.current_rect_item)
+        #         del self.current_rect_item
+        #     return
+        # else:
+        #     # Parse the received message
+        #     # msg_data = json.loads(msg)
+        #     msg_data = msg
+        #     if "DRAW_BOX" in msg_data:
+        #         top_left = tuple(msg_data["DRAW_BOX"]["TOP_LEFT"])
+        #         lower_right = tuple(msg_data["DRAW_BOX"]["BOTTOM_RIGHT"])
+        #         self.draw_box(top_left=top_left, lower_right=lower_right)
 
     ### Config related functions ------------------------------------------------------
 

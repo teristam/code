@@ -93,7 +93,11 @@ class ImageClient:
             return
         
         self.win.setImage(processed_image.T, autoLevels=True)  # Transpose if needed for correct orientation
-
+        msg = {"DRAW_BOX": {"TOP_LEFT": 100, "BOTTOM_RIGHT": 200}}
+        msg['width'] = processed_image.shape[0]
+        msg['height'] = processed_image.shape[1]
+        # print('pushing')
+        self.push_socket.send_multipart([b'processed', msgpack.packb(msg), processed_image])
 
         # Generate random coordinates for the box
         # height, width = 100, 100

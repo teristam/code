@@ -1,5 +1,6 @@
 import zmq
-
+import msgpack
+import numpy as np 
 
 class Image_socket:
     """Wrapper around zmq socket for publishing the images acquired to a address"""
@@ -29,8 +30,12 @@ class Image_socket:
         """Try to recieve data in the pull socket"""
         try:
             if self.pull_address.poll(timeout=timeout):
-                msg = self.pull_address.recv_json()
-                return msg
+                msg1, msg2, msg3 = self.pull_address.recv_multipart()
+                topic = msg1
+                metadata = msgpack.unpackb(msg2)
+                print(metadata)
+                image = np.frombuffer(msg3, dtype=np.uint8).reshape((metadata["height"], metadata["width"])) 
+                return topic, metadata, image
         except zmq.Again:
             return
 
