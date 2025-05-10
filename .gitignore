@@ -14,3 +14,4 @@ test/SLEAP/models/
 test/SLEAP/video/
 
 .DS_Store
+.egg-info
