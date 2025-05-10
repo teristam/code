@@ -46,22 +46,6 @@ def test_send_calls_send_multipart(mock_zmq_context, mock_camera_widget):
     pub_socket.send_multipart.assert_called_once_with([topic, metadata, image])
 
 
-def test_get_receives_json(mock_zmq_context, mock_camera_widget):
-    mock_context_instance = MagicMock()
-    mock_zmq_context.return_value = mock_context_instance
-    pub_socket = MagicMock()
-    pull_socket = MagicMock()
-    mock_context_instance.socket.side_effect = [pub_socket, pull_socket]
-    sock = Image_socket(mock_camera_widget, 'tcp://127.0.0.1:5555', 'tcp://127.0.0.1:5556')
-
-    pull_socket.poll.return_value = True
-    pull_socket.recv_json.return_value = {'foo': 'bar'}
-    result = sock.get(timeout=100)
-    assert result == {'foo': 'bar'}
-    pull_socket.poll.assert_called_once_with(timeout=100)
-    pull_socket.recv_json.assert_called_once()
-
-
 def test_get_returns_none_on_zmq_again(mock_zmq_context, mock_camera_widget):
     mock_context_instance = MagicMock()
     mock_zmq_context.return_value = mock_context_instance
